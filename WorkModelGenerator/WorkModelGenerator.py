@@ -43,6 +43,7 @@ def get_work_model(service_graph, workmodel_params):
         tmp_dict=dict() # string to be inserted as internal service in workmodel.json if this function is chosen 
         tmp_dict.update({"internal_service": {w["value"]["name"]: w["value"]["parameters"]}})
         tmp_dict.update({"request_method": request_method})
+        tmp_dict.update({"scheduler-name": "default-scheduler"})
         if "workers" in w["value"]:
             tmp_dict.update({"workers": w["value"]["workers"]})
         if "threads" in w["value"]:

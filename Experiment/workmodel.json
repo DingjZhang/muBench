@@ -1,0 +1,619 @@
+{
+    "s0": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s1",
+            "s2",
+            "s3",
+            "s8"
+          ],
+          "probabilities": {
+            "s1": 1.0,
+            "s2": 1.0,
+            "s3": 1.0,
+            "s8": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "sdb1": {
+      "external_services": [],
+      "internal_service": {
+        "loader": {
+          "cpu_stress": {
+            "run": false,
+            "range_complexity": [
+              100,
+              100
+            ],
+            "thread_pool_size": 1,
+            "trials": 1
+          },
+          "memory_stress": {
+            "run": false,
+            "memory_size": 10000,
+            "memory_io": 1000
+          },
+          "disk_stress": {
+            "run": true,
+            "tmp_file_name": "mubtestfile.txt",
+            "disk_write_block_count": 1000,
+            "disk_write_block_size": 1024
+          },
+          "sleep_stress": {
+            "run": false,
+            "sleep_time": 0.01
+          },
+          "mean_response_size": 11
+        }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m",
+      "sidecar": "mongo:4.4.9"
+    },
+    "s1": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s4",
+            "s6",
+            "s7",
+            "s19"
+          ],
+          "probabilities": {
+            "s4": 1.0,
+            "s6": 1.0,
+            "s7": 1.0,
+            "s19": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s2": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s13"
+          ],
+          "probabilities": {
+            "s13": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb2"
+          ]
+        }
+      ],
+      "internal_service": {
+        "loader": {
+          "cpu_stress": {
+            "run": true,
+            "range_complexity": [
+              1000,
+              1000
+            ],
+            "thread_pool_size": 1,
+            "trials": 1
+          },
+          "memory_stress": {
+            "run": false,
+            "memory_size": 10000,
+            "memory_io": 1000
+          },
+          "disk_stress": {
+            "run": false,
+            "tmp_file_name": "mubtestfile.txt",
+            "disk_write_block_count": 1000,
+            "disk_write_block_size": 1024
+          },
+          "sleep_stress": {
+            "run": false,
+            "sleep_time": 0.01
+          },
+          "mean_response_size": 11
+        }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "replicas": 2,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "sdb2": {
+      "external_services": [],
+      "internal_service": {
+        "loader": {
+          "cpu_stress": {
+            "run": false,
+            "range_complexity": [
+              100,
+              100
+            ],
+            "thread_pool_size": 1,
+            "trials": 1
+          },
+          "memory_stress": {
+            "run": false,
+            "memory_size": 10000,
+            "memory_io": 1000
+          },
+          "disk_stress": {
+            "run": true,
+            "tmp_file_name": "mubtestfile.txt",
+            "disk_write_block_count": 1000,
+            "disk_write_block_size": 1024
+          },
+          "sleep_stress": {
+            "run": false,
+            "sleep_time": 0.01
+          },
+          "mean_response_size": 11
+        }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s3": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s12"
+          ],
+          "probabilities": {
+            "s12": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s4": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s5",
+            "s14"
+          ],
+          "probabilities": {
+            "s5": 1.0,
+            "s14": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s5": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s10"
+          ],
+          "probabilities": {
+            "s10": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s6": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s16",
+            "s17"
+          ],
+          "probabilities": {
+            "s16": 1.0,
+            "s17": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "loader": {
+          "cpu_stress": {
+            "run": true,
+            "range_complexity": [
+              1000,
+              1000
+            ],
+            "thread_pool_size": 1,
+            "trials": 1
+          },
+          "memory_stress": {
+            "run": false,
+            "memory_size": 10000,
+            "memory_io": 1000
+          },
+          "disk_stress": {
+            "run": false,
+            "tmp_file_name": "mubtestfile.txt",
+            "disk_write_block_count": 1000,
+            "disk_write_block_size": 1024
+          },
+          "sleep_stress": {
+            "run": false,
+            "sleep_time": 0.01
+          },
+          "mean_response_size": 11
+        }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "replicas": 2,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s7": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s9"
+          ],
+          "probabilities": {
+            "s9": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s8": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s9": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s11",
+            "s15"
+          ],
+          "probabilities": {
+            "s11": 1.0,
+            "s15": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s10": {
+      "external_services": [],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s11": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb2"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s12": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb2"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s13": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "loader": {
+          "cpu_stress": {
+            "run": true,
+            "range_complexity": [
+              1000,
+              1000
+            ],
+            "thread_pool_size": 1,
+            "trials": 1
+          },
+          "memory_stress": {
+            "run": false,
+            "memory_size": 10000,
+            "memory_io": 1000
+          },
+          "disk_stress": {
+            "run": false,
+            "tmp_file_name": "mubtestfile.txt",
+            "disk_write_block_count": 1000,
+            "disk_write_block_size": 1024
+          },
+          "sleep_stress": {
+            "run": false,
+            "sleep_time": 0.01
+          },
+          "mean_response_size": 11
+        }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "replicas": 2,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s14": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s15": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s16": {
+      "external_services": [
+        {
+          "seq_len": 20,
+          "services": [
+            "s18"
+          ],
+          "probabilities": {
+            "s18": 1.0
+          }
+        },
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb2"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s17": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s18": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb2"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    },
+    "s19": {
+      "external_services": [
+        {
+          "seq_len": 1,
+          "services": [
+            "sdb1"
+          ]
+        }
+      ],
+      "internal_service": {
+        "colosseum": {}
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-limits": "200m",
+      "cpu-requests": "200m"
+    }
+  }

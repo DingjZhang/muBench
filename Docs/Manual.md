@@ -311,6 +311,13 @@ Using this information, K8sDeployer generates YAML files for running the µBench
    "WorkModelPath": "SimulationWorkspace/workmodel.json"
 }
 ```
+- `K8sParameters`
+  - `prefix_yaml_file`: name of the output YAML files
+  - `namespace`: namespace of the deployment
+  - `image`: Docker image of the service-cell
+  - `cluster_domain`: K8s cluster domain
+  - `path`: URL path used to trigger the service of service-cells
+  - `dns-resolver`: K8s DNS service name
 
 Run `RunK8sDeployer.py` from the K8s Master node as follows
 
@@ -1122,12 +1129,13 @@ Create and activate a Python virtual environment, and install required modules
 
 ```zsh
 cd $HOME/muBench
-python3 -m venv .venv
+python3 -m venv venv
 
-source .venv/bin/activate
-
-pip3 install wheel
-pip3 install -r requirements.txt
+source venv/bin/activate
+sudo apt install python3-dev cmake -y
+python -m pip install "cython<3.0.0" wheel
+python -m pip install --no-build-isolation PyYAML==5.4.1
+python -m pip install -r requirements.txt
 ```
 
 Note: If you had errors in installing the required modules, it may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g., `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.

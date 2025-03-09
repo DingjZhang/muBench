@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: least-replica-first-scheduler
+  namespace: kube-system
+  labels:
+    app: least-replica-first-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: least-replica-first-scheduler
+  template:
+    metadata:
+      labels:
+        app: least-replica-first-scheduler
+    spec:
+      serviceAccountName: least-replica-first-scheduler
+      containers:
+      - name: scheduler
+        image: docker.io/civildocker/least-replica-first-scheduler:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        env:
+        - name: SCHEDULER_NAME
+          value: "least-replica-first-scheduler"
+        - name: LOG_LEVEL
+          value: "INFO"
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"

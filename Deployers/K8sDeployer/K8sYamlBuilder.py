@@ -17,10 +17,12 @@ def customization_work_model(workmodel, k8s_parameters):
         workmodel[service].update({"path": k8s_parameters['path']})
         workmodel[service].update({"image": k8s_parameters['image']})
         workmodel[service].update({"namespace": k8s_parameters['namespace']})
+        print(f"current svc {service} has a url value of {workmodel[service]['url']}")
                     
         if "scheduler-name" in workmodel[service].keys():
             # override scheduler-name value of workmodel.json
             workmodel[service].update({"scheduler-name": k8s_parameters['scheduler-name']})
+            print(f"current svc {service} has a scheduler-name value of {workmodel[service]['scheduler-name']}")
         if "replicas" in k8s_parameters.keys():
             # override replica value of workmodel.json
             workmodel[service].update({"replicas": k8s_parameters['replicas']})

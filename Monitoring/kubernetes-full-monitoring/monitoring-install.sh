@@ -1,5 +1,5 @@
 # Secure .kube
-chmod go-r -R ~/.kube/
+# chmod go-r -R ~/.kube/
 
 # Prometherus
 kubectl create namespace monitoring
