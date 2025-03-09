@@ -1,0 +1,8 @@
+{
+    "RunServiceGraphGeneratorFilePath": "ServiceGraphGenerator/RunServiceGraphGen.py",
+    "RunWorkModelGeneratorFilePath": "WorkModelGenerator/RunWorkModelGen.py",
+    "RunK8sDeployerFilePath": "Deployers/K8sDeployer/RunK8sDeployer.py",
+    "ServiceGraphParametersFilePath": "Experiment/ServiceGraphParameters.json",
+    "WorkModelParametersFilePath": "Experiment/WorkModelParameters.json",
+    "K8sParametersFilePath": "Experiment/K8sParameters.json"
+ }

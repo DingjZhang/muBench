@@ -10,8 +10,8 @@ metadata:
   name: least-replica-first-scheduler
 rules:
 - apiGroups: [""] # "" 表示核心API组
-  resources: ["pods", "nodes", "persistentvolumeclaims", "persistentvolumes", "services"]
-  verbs: ["get", "list", "watch"]
+  resources: ["pods", "nodes", "persistentvolumeclaims", "persistentvolumes", "services", "bindings"]
+  verbs: ["get", "list", "watch", "create"]
 - apiGroups: [""] 
   resources: ["pods/binding", "pods/eviction"]
   verbs: ["create"]

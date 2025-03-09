@@ -1,4 +1,4 @@
-﻿#!/usr/bin/bash
+#!/usr/bin/bash
 # 这个脚本用于在master节点设置Kubernetes集群
 # 请在Ubuntu 22.04系统上以root或sudo权限运行
 
@@ -35,11 +35,12 @@ hostnamectl set-hostname node0
 # read -p "请输入master节点IP地址: " MASTER_IP
 # read -p "请输入worker节点IP地址: " WORKER_IP
 
-MASTER_DOMAIN_NAME="pc75.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc74.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc98.cloudlab.umass.edu"
-WORKER3_DOMAIN_NAME="pc63.cloudlab.umass.edu"
-WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="pc74.cloudlab.umass.edu"
+WORKER1_DOMAIN_NAME="pc91.cloudlab.umass.edu"
+WORKER2_DOMAIN_NAME="pc99.cloudlab.umass.edu"
+WORKER3_DOMAIN_NAME="pc71.cloudlab.umass.edu"
+WORKER4_DOMAIN_NAME="pc66.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="pc83.cloudlab.umass.edu"
 
 
 
@@ -48,6 +49,7 @@ WORKER1_IP=$(getent hosts $WORKER1_DOMAIN_NAME | awk '{print $1}')
 WORKER2_IP=$(getent hosts $WORKER2_DOMAIN_NAME | awk '{print $1}')
 WORKER3_IP=$(getent hosts $WORKER3_DOMAIN_NAME | awk '{print $1}')
 WORKER4_IP=$(getent hosts $WORKER4_DOMAIN_NAME | awk '{print $1}')
+LOAD_GEN_IP=$(getent hosts $LOAD_GEN_DOMAIN_NAME | awk '{print $1}')
 
 # 使用ifconifg获取eno1接口的IP作为MASTER_IP
 MASTER_IP=$(ip addr show eno1 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
@@ -66,6 +68,7 @@ $WORKER1_IP node1
 $WORKER2_IP node2
 $WORKER3_IP node3
 $WORKER4_IP node4
+$LOAD_GEN_IP node5
 EOF
 
 # 更新系统

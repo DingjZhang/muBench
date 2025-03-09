@@ -19,7 +19,7 @@ spec:
       containers:
       - name: scheduler
         image: docker.io/civildocker/least-replica-first-scheduler:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 100m

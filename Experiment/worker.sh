@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # 这个脚本用于在worker节点设置Kubernetes并加入集群
 # 请在Ubuntu 22.04系统上以root或sudo权限运行
 
@@ -18,11 +18,13 @@ echo -e "${GREEN}开始配置Kubernetes工作节点...${NC}"
 # 提示用户输入IP地址
 #read -p "请输入master节点IP地址: " MASTER_IP
 #read -p "请输入worker节点IP地址: " WORKER_IP
-MASTER_DOMAIN_NAME="pc75.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc74.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc98.cloudlab.umass.edu"
-WORKER3_DOMAIN_NAME="pc63.cloudlab.umass.edu"
-WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="pc74.cloudlab.umass.edu"
+WORKER1_DOMAIN_NAME="pc91.cloudlab.umass.edu"
+WORKER2_DOMAIN_NAME="pc99.cloudlab.umass.edu"
+WORKER3_DOMAIN_NAME="pc71.cloudlab.umass.edu"
+WORKER4_DOMAIN_NAME="pc66.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="pc83.cloudlab.umass.edu"
+
 
 # 通过域名获取WORKER1_IP
 MASTER_IP=$(getent hosts $MASTER_DOMAIN_NAME | awk '{print $1}')
@@ -30,6 +32,7 @@ WORKER1_IP=$(getent hosts $WORKER1_DOMAIN_NAME | awk '{print $1}')
 WORKER2_IP=$(getent hosts $WORKER2_DOMAIN_NAME | awk '{print $1}')
 WORKER3_IP=$(getent hosts $WORKER3_DOMAIN_NAME | awk '{print $1}')
 WORKER4_IP=$(getent hosts $WORKER4_DOMAIN_NAME | awk '{print $1}')
+LOAD_GEN_IP=$(getent hosts $LOAD_GEN_DOMAIN_NAME | awk '{print $1}')
 
 # 更新hosts文件, 不保留原来的内容
 echo -e "${GREEN}更新hosts文件...${NC}"
@@ -39,16 +42,20 @@ $WORKER1_IP node1
 $WORKER2_IP node2
 $WORKER3_IP node3
 $WORKER4_IP node4
+$LOAD_GEN_IP node5
 EOF
 
 # 根据IP地址设置主机名
-if [ "$WORKER1_IP" = "$(hostname -I | awk '{print $1}')" ]; then
+# 获取本机所有IP地址
+HOST_IPS=$(hostname -I)
+
+if echo "$HOST_IPS" | grep -q "$WORKER1_IP"; then
     hostnamectl set-hostname node1
-elif [ "$WORKER2_IP" = "$(hostname -I | awk '{print $1}')" ]; then
+elif echo "$HOST_IPS" | grep -q "$WORKER2_IP"; then
     hostnamectl set-hostname node2
-elif [ "$WORKER3_IP" = "$(hostname -I | awk '{print $1}')" ]; then
+elif echo "$HOST_IPS" | grep -q "$WORKER3_IP"; then
     hostnamectl set-hostname node3
-elif [ "$WORKER4_IP" = "$(hostname -I | awk '{print $1}')" ]; then
+elif echo "$HOST_IPS" | grep -q "$WORKER4_IP"; then
     hostnamectl set-hostname node4
 fi
 

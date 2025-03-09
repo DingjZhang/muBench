@@ -111,11 +111,11 @@ def collect_prometheus_metrics(metric_name, start_time=None, end_time=None, step
 if __name__ == "__main__":
     # 采集CPU使用率指标的过去2小时数据
     end_time = datetime.now()
-    start_time = end_time - timedelta(hours=2)
+    start_time = end_time - timedelta(hours=1)
     collect_prometheus_metrics(
         metric_name="node_cpu_seconds_total{mode='idle'}",
         start_time=start_time,
         end_time=end_time,
         step='15s',
-        prometheus_url='http://localhost:9090'
+        prometheus_url='http://localhost:30000'
     )
