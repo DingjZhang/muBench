@@ -1,12 +1,15 @@
 import json
 import os
+import sys
 import yaml
 from pprint import pprint
 
 
 K8s_YAML_BUILDER_PATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.abspath(os.path.join(K8s_YAML_BUILDER_PATH, '..', '..', 'Add-on', 'HPA')))
+import create_hpa as CreateHPA
 
-SIDECAR_TEMPLATE = "- name: %s-sidecar\n          image: %s"
+SIDECAR_TEMPLATE = "- name: %s-sidecar\n          image: %s\n          resources:\n            requests:\n              cpu: 100m\n            limits:\n              cpu: 500m"
 NODE_AFFINITY_TEMPLATE = {'affinity': {'nodeAffinity': {'requiredDuringSchedulingIgnoredDuringExecution': {'nodeSelectorTerms': [{'matchExpressions': [{'key': 'kubernetes.io/hostname','operator': 'In','values': ['']}]}]}}}}
 POD_ANTIAFFINITI_TEMPLATE = {'affinity':{'podAntiAffinity':{'requiredDuringSchedulingIgnoredDuringExecution':[{'labelSelector':{'matchExpressions':[{'key':'app','operator':'In','values':['']}]},'topologyKey':'kubernetes.io/hostname'}]}}}
 
@@ -180,3 +183,18 @@ def create_internalservice_configmap_yaml_file(k8s_parameters, nfs, output_path,
     with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-ConfigMapInternalServices.yaml", "w") as file:
         file.write(f)
     print("Internal-Services Configmap Created!")
+
+def add_hpa_to_yaml_files(folder, hpa_template_file, output_folder):
+    # get yaml file list from folder
+    yaml_files = os.listdir(folder)
+    yaml_files = [os.path.join(folder, f) for f in yaml_files if f.endswith('.yaml')]
+    # 获取输出文件夹路径(去掉最后一级目录)
+    # output_folder = os.path.dirname(folder)
+    # output_folder = os.path.join(output_folder, 'hpa_yamls')
+    # 创建输出文件夹
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    for f in yaml_files:
+        output_file_name = 'hpa-'+f.split('/')[-1]
+        output_file_name = os.path.join(output_folder, output_file_name)
+        CreateHPA.create_hpa(f, output_file_name, hpa_template_file)

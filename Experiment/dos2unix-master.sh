@@ -24,8 +24,8 @@ while true; do
     echo "当前集群节点数: $NODE_COUNT"
     
     # 检查节点数量是否达到5个或更多
-    if [ "$NODE_COUNT" -ge 5 ]; then
-        echo "节点数量已达到5个或更多，开始执行install-mubench.sh脚本"
+    if [ "$NODE_COUNT" -ge 3 ]; then
+        echo "节点数量已达到3个或更多，开始执行install-mubench.sh脚本"
         break
     fi
     

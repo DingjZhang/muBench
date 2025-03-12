@@ -5,15 +5,15 @@
          "value": {
             "name": "compute_pi",
             "recipient": "service",
-            "probability":0,
+            "probability":1,
             "parameters": {
                "mean_response_size":10,
                "range_complexity":[50, 100]
             },
             "workers":4,
             "threads":16,
-            "cpu-requests": "1000m",
-            "cpu-limits": "1000m"
+            "cpu-requests": "500m",
+            "cpu-limits": "500m"
          }
       },
       "f1": {
@@ -25,8 +25,8 @@
             "parameters":{},
             "workers":4,
             "threads":16,
-            "cpu-requests": "1000m",
-            "cpu-limits": "1000m"
+            "cpu-requests": "500m",
+            "cpu-limits": "500m"
          }
       },
       "f2": {
@@ -34,7 +34,7 @@
          "value": {
             "name": "loader",
             "recipient": "database",
-            "probability":1,
+            "probability":0.0,
             "parameters": {
                "cpu_stress": {"run":false,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
@@ -44,8 +44,8 @@
             },
             "workers":4,
             "threads":16,
-            "cpu-requests": "1000m",
-            "cpu-limits": "1000m"
+            "cpu-requests": "500m",
+            "cpu-limits": "500m"
          }
       },
       "f3": {
@@ -53,7 +53,7 @@
          "value": {
             "name": "loader",
             "recipient": "service",
-            "probability":1,
+            "probability":0.0,
             "parameters": {
                "cpu_stress": {"run":true,"range_complexity": [1000, 1000], "thread_pool_size": 1, "trials": 1},
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
@@ -63,9 +63,25 @@
             },
             "workers":4,
             "threads":16,
-            "cpu-requests": "1000m",
-            "cpu-limits": "1000m",
+            "cpu-requests": "500m",
+            "cpu-limits": "500m",
             "replicas": 2
+         }
+      },
+      "f4":{
+         "type": "function",
+         "value": {
+            "name": "compute_pi",
+            "recipient": "database",
+            "probability":1,
+            "parameters": {
+               "mean_response_size":10,
+               "range_complexity":[50, 100]
+            },
+            "workers":4,
+            "threads":16,
+            "cpu-requests": "500m",
+            "cpu-limits": "500m"
          }
       },
       "request_method":{

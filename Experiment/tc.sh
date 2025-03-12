@@ -16,19 +16,19 @@ while getopts ":d" opt; do
 done
 shift $((OPTIND -1))
 
-MASTER_DOMAIN_NAME="pc74.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc91.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc99.cloudlab.umass.edu"
-WORKER3_DOMAIN_NAME="pc71.cloudlab.umass.edu"
-WORKER4_DOMAIN_NAME="pc66.cloudlab.umass.edu"
-LOAD_GEN_DOMAIN_NAME="pc83.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="pc63.cloudlab.umass.edu"
+WORKER1_DOMAIN_NAME="pc84.cloudlab.umass.edu"
+WORKER2_DOMAIN_NAME="pc70.cloudlab.umass.edu"
+# WORKER3_DOMAIN_NAME="pc85.cloudlab.umass.edu"
+# WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="pc94.cloudlab.umass.edu"
 
 
 MASTER_IP=$(getent hosts $MASTER_DOMAIN_NAME | awk '{print $1}')
 WORKER1_IP=$(getent hosts $WORKER1_DOMAIN_NAME | awk '{print $1}')
 WORKER2_IP=$(getent hosts $WORKER2_DOMAIN_NAME | awk '{print $1}')
-WORKER3_IP=$(getent hosts $WORKER3_DOMAIN_NAME | awk '{print $1}')
-WORKER4_IP=$(getent hosts $WORKER4_DOMAIN_NAME | awk '{print $1}')
+# WORKER3_IP=$(getent hosts $WORKER3_DOMAIN_NAME | awk '{print $1}')
+# WORKER4_IP=$(getent hosts $WORKER4_DOMAIN_NAME | awk '{print $1}')
 LOAD_GEN_IP=$(getent hosts $LOAD_GEN_DOMAIN_NAME | awk '{print $1}')
 
 
@@ -46,14 +46,16 @@ if [ "$DELETE_ONLY" = true ]; then
     exit 0
 fi
 
-if [ "$CURRENT_IP" = "$MASTER_IP" ] || [ "$CURRENT_IP" = "$WORKER1_IP" ] || [ "$CURRENT_IP" = "$WORKER2_IP" ] || [ "$CURRENT_IP" = "$LOAD_GEN_IP" ]; then
+# if [ "$CURRENT_IP" = "$MASTER_IP" ] || [ "$CURRENT_IP" = "$WORKER1_IP" ] || [ "$CURRENT_IP" = "$WORKER2_IP" ] || [ "$CURRENT_IP" = "$LOAD_GEN_IP" ]; then
+if [ "$CURRENT_IP" = "$MASTER_IP" ] || [ "$CURRENT_IP" = "$WORKER1_IP" ] || [ "$CURRENT_IP" = "$LOAD_GEN_IP" ]; then
     echo "执行命令"
     tc qdisc del dev $NETWORK_INTERFACE root 2>/dev/null
     tc qdisc add dev $NETWORK_INTERFACE root handle 1: prio
     tc qdisc add dev $NETWORK_INTERFACE parent 1:1 handle 10: netem delay 20ms 3ms distribution normal
     
-    tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER3_IP flowid 1:1
-    tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER4_IP flowid 1:1
+    tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER2_IP flowid 1:1
+    # tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER3_IP flowid 1:1
+    # tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER4_IP flowid 1:1
     
 else
     echo "执行命令"
@@ -63,7 +65,7 @@ else
     
     tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $MASTER_IP flowid 1:1
     tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER1_IP flowid 1:1
-    tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER2_IP flowid 1:1
+    # tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $WORKER2_IP flowid 1:1
     tc filter add dev $NETWORK_INTERFACE parent 1:0 protocol ip prio 1 u32 match ip dst $LOAD_GEN_IP flowid 1:1
 fi
 

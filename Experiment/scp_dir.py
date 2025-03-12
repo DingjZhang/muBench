@@ -15,14 +15,15 @@ def main():
     # 解析命令行参数
     parser = argparse.ArgumentParser(description='将文件发送到服务器')
     parser.add_argument('--master', action='store_true', help='只向master服务器发送文件')
+    parser.add_argument('--update', action='store_true', help='更新脚本中的域名变量')
     args = parser.parse_args()
     # 设置域名变量
-    master_domain_name = "pc74.cloudlab.umass.edu"
-    worker1_domain_name = "pc91.cloudlab.umass.edu"
-    worker2_domain_name = "pc99.cloudlab.umass.edu"
-    worker3_domain_name = "pc71.cloudlab.umass.edu"
-    worker4_domain_name = "pc66.cloudlab.umass.edu"
-    load_gen_domain_name = "pc83.cloudlab.umass.edu"
+    master_domain_name = "pc63.cloudlab.umass.edu"
+    worker1_domain_name = "pc84.cloudlab.umass.edu"
+    worker2_domain_name = "pc70.cloudlab.umass.edu"
+    # worker3_domain_name = "pc85.cloudlab.umass.edu"
+    # worker4_domain_name = "pc83.cloudlab.umass.edu"
+    load_gen_domain_name = "pc94.cloudlab.umass.edu"
     
     # 定义要发送的文件夹路径
     # source_dir = r"D:\adaptation\muBench\Experiment"
@@ -31,51 +32,52 @@ def main():
     target_dir = "~/Experiment"
     username = "Dingjie"
     
-    print("正在更新脚本中的域名变量...")
+    if args.update:
+        print("正在更新脚本中的域名变量...")
+        
+        # 更新 shell 脚本中的域名变量
+        shell_scripts = ["master.sh", "worker.sh", "tc.sh"]
+        for script in shell_scripts:
+            script_path = os.path.join(source_dir, script)
+            if os.path.exists(script_path):
+                # 读取文件内容
+                with open(script_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # 替换域名变量
+                content = re.sub(r'MASTER_DOMAIN_NAME=".*?"', f'MASTER_DOMAIN_NAME="{master_domain_name}"', content)
+                content = re.sub(r'WORKER1_DOMAIN_NAME=".*?"', f'WORKER1_DOMAIN_NAME="{worker1_domain_name}"', content)
+                content = re.sub(r'WORKER2_DOMAIN_NAME=".*?"', f'WORKER2_DOMAIN_NAME="{worker2_domain_name}"', content)
+                # content = re.sub(r'WORKER3_DOMAIN_NAME=".*?"', f'WORKER3_DOMAIN_NAME="{worker3_domain_name}"', content)
+                # content = re.sub(r'WORKER4_DOMAIN_NAME=".*?"', f'WORKER4_DOMAIN_NAME="{worker4_domain_name}"', content)
+                content = re.sub(r'LOAD_GEN_DOMAIN_NAME=".*?"', f'LOAD_GEN_DOMAIN_NAME="{load_gen_domain_name}"', content)
+                # 转换为 Unix 格式（LF 换行符）
+                content = content.replace('\r\n', '\n')
+                
+                # 写回文件
+                with open(script_path, 'w', encoding='utf-8', newline='\n') as f:
+                    f.write(content)
+        
+        print("域名变量更新和格式转换完成！")
     
-    # 更新 shell 脚本中的域名变量
-    shell_scripts = ["master.sh", "worker.sh", "tc.sh"]
-    for script in shell_scripts:
-        script_path = os.path.join(source_dir, script)
-        if os.path.exists(script_path):
-            # 读取文件内容
-            with open(script_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            # 替换域名变量
-            content = re.sub(r'MASTER_DOMAIN_NAME=".*?"', f'MASTER_DOMAIN_NAME="{master_domain_name}"', content)
-            content = re.sub(r'WORKER1_DOMAIN_NAME=".*?"', f'WORKER1_DOMAIN_NAME="{worker1_domain_name}"', content)
-            content = re.sub(r'WORKER2_DOMAIN_NAME=".*?"', f'WORKER2_DOMAIN_NAME="{worker2_domain_name}"', content)
-            content = re.sub(r'WORKER3_DOMAIN_NAME=".*?"', f'WORKER3_DOMAIN_NAME="{worker3_domain_name}"', content)
-            content = re.sub(r'WORKER4_DOMAIN_NAME=".*?"', f'WORKER4_DOMAIN_NAME="{worker4_domain_name}"', content)
-            content = re.sub(r'LOAD_GEN_DOMAIN_NAME=".*?"', f'LOAD_GEN_DOMAIN_NAME="{load_gen_domain_name}"', content)
-            # 转换为 Unix 格式（LF 换行符）
-            content = content.replace('\r\n', '\n')
-            
-            # 写回文件
-            with open(script_path, 'w', encoding='utf-8', newline='\n') as f:
-                f.write(content)
-    
-    print("域名变量更新和格式转换完成！")
-
-    print("正在将shell脚本转换为Unix格式...")
-    
-    # 获取source_dir中所有.sh结尾的文件
-    shell_files = glob.glob(os.path.join(source_dir, "*.sh"))
-    
-    # 对每个shell脚本执行dos2unix转换
-    for shell_file in shell_files:
-        try:
-            # 使用subprocess调用dos2unix命令
-            subprocess.run(["dos2unix", shell_file], check=True)
-            print(f"成功转换文件: {shell_file}")
-        except subprocess.CalledProcessError as e:
-            print(f"转换文件失败 {shell_file}: {str(e)}")
-        except FileNotFoundError:
-            print("错误: 未找到dos2unix命令，请确保已安装")
-            sys.exit(1)
-    
-    print("shell脚本格式转换完成！")
+        print("正在将shell脚本转换为Unix格式...")
+        
+        # 获取source_dir中所有.sh结尾的文件
+        shell_files = glob.glob(os.path.join(source_dir, "*.sh"))
+        
+        # 对每个shell脚本执行dos2unix转换
+        for shell_file in shell_files:
+            try:
+                # 使用subprocess调用dos2unix命令
+                subprocess.run(["dos2unix", shell_file], check=True)
+                print(f"成功转换文件: {shell_file}")
+            except subprocess.CalledProcessError as e:
+                print(f"转换文件失败 {shell_file}: {str(e)}")
+            except FileNotFoundError:
+                print("错误: 未找到dos2unix命令，请确保已安装")
+                sys.exit(1)
+        
+        print("shell脚本格式转换完成！")
     
     # 根据命令行参数决定发送文件的目标服务器
     if args.master:
@@ -88,9 +90,9 @@ def main():
         # 使用 scp 将文件夹发送到所有 worker 服务器
         worker_servers = [
             worker1_domain_name,
-            worker2_domain_name,
-            worker3_domain_name,
-            worker4_domain_name
+            worker2_domain_name
+            # worker3_domain_name,
+            # worker4_domain_name
         ]
         
         for server in worker_servers:

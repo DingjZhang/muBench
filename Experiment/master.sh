@@ -35,20 +35,20 @@ hostnamectl set-hostname node0
 # read -p "请输入master节点IP地址: " MASTER_IP
 # read -p "请输入worker节点IP地址: " WORKER_IP
 
-MASTER_DOMAIN_NAME="pc74.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc91.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc99.cloudlab.umass.edu"
-WORKER3_DOMAIN_NAME="pc71.cloudlab.umass.edu"
-WORKER4_DOMAIN_NAME="pc66.cloudlab.umass.edu"
-LOAD_GEN_DOMAIN_NAME="pc83.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="pc63.cloudlab.umass.edu"
+WORKER1_DOMAIN_NAME="pc84.cloudlab.umass.edu"
+WORKER2_DOMAIN_NAME="pc70.cloudlab.umass.edu"
+# WORKER3_DOMAIN_NAME="pc85.cloudlab.umass.edu"
+# WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="pc94.cloudlab.umass.edu"
 
 
 
 # 通过域名获取WORKER1_IP
 WORKER1_IP=$(getent hosts $WORKER1_DOMAIN_NAME | awk '{print $1}')
 WORKER2_IP=$(getent hosts $WORKER2_DOMAIN_NAME | awk '{print $1}')
-WORKER3_IP=$(getent hosts $WORKER3_DOMAIN_NAME | awk '{print $1}')
-WORKER4_IP=$(getent hosts $WORKER4_DOMAIN_NAME | awk '{print $1}')
+# WORKER3_IP=$(getent hosts $WORKER3_DOMAIN_NAME | awk '{print $1}')
+# WORKER4_IP=$(getent hosts $WORKER4_DOMAIN_NAME | awk '{print $1}')
 LOAD_GEN_IP=$(getent hosts $LOAD_GEN_DOMAIN_NAME | awk '{print $1}')
 
 # 使用ifconifg获取eno1接口的IP作为MASTER_IP
@@ -66,9 +66,7 @@ cat <<EOF > /etc/hosts
 $MASTER_IP node0
 $WORKER1_IP node1
 $WORKER2_IP node2
-$WORKER3_IP node3
-$WORKER4_IP node4
-$LOAD_GEN_IP node5
+$LOAD_GEN_IP node3
 EOF
 
 # 更新系统

@@ -28,8 +28,14 @@ chmod -R 777 ${USER_HOME}/.cache
 apt-get install -y python3-dev cmake
 python -m pip install "cython<3.0.0" wheel
 python -m pip install --no-build-isolation PyYAML==5.4.1
-sudo apt-get install libffi-dev libcairo2 -y
+sudo apt-get -y install libffi-dev libcairo2
 python -m pip install --cache-dir=${PIP_CACHE_DIR} -r requirements.txt
+
+# 检查节点名是否包含node5
+if hostname | grep -q "node3"; then
+  echo "检测到节点名包含node3，跳过节点标签添加并结束脚本执行"
+  exit 0
+fi
 
 # 将monitoring-install.sh的换行符从CRLF转换为LF
 cd /users/Dingjie/muBench/Monitoring/kubernetes-full-monitoring
@@ -37,19 +43,15 @@ dos2unix monitoring-install.sh
 
 sh monitoring-install.sh
 
-# 检查节点名是否包含node5
-if hostname | grep -q "node5"; then
-  echo "检测到节点名包含node5，跳过节点标签添加并结束脚本执行"
-  exit 0
-fi
 
 # 为节点添加标签
 echo "为Kubernetes节点添加标签..."
 # 为node1和node2添加标签local
 kubectl label nodes node1 node-type=local --overwrite
-kubectl label nodes node2 node-type=local --overwrite
+kubectl label nodes node2 node-type=remote --overwrite
 # 为node3和node4添加标签remote
-kubectl label nodes node3 node-type=remote --overwrite
-kubectl label nodes node4 node-type=remote --overwrite
+# kubectl label nodes node3 node-type=remote --overwrite
+# kubectl label nodes node4 node-type=remote --overwrite
 echo "节点标签添加完成"
 
+kubectl apply -f Experiment/components.yaml

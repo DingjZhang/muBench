@@ -30,6 +30,11 @@ spec:
           subPath: nginx.conf
         - mountPath: /var/log/nginx
           name: log
+        resources: 
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 1000m
       schedulerName: {{SCHEDULER_NAME}}
       volumes:
       - name: config-volume

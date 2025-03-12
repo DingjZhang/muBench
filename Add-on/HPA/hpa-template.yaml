@@ -5,12 +5,12 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-  minReplicas: 1
-  maxReplicas: 10
+  minReplicas: 2
+  maxReplicas: 50
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 60
+        averageUtilization: 40

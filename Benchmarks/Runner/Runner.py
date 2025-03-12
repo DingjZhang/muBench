@@ -11,9 +11,63 @@ import os
 import shutil
 import importlib
 from pprint import pprint
+import subprocess
+import signal
+import atexit
 
 import argparse
 import argcomplete
+
+# 全局变量，用于存储prometheus_collector进程
+prometheus_collector_process = None
+
+def start_prometheus_collector(output_filename=None):
+    """启动prometheus_collector.py脚本在后台运行"""
+    global prometheus_collector_process
+    
+    # 构建命令参数
+    cmd = [sys.executable, os.path.join('Experiment', 'promethheus_collector.py')]
+    if output_filename:
+        cmd.append(output_filename)
+    
+    print("启动Prometheus数据收集进程...")
+    # 使用subprocess.Popen启动进程，不阻塞主进程
+    prometheus_collector_process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    
+    # 注册退出处理函数，确保在Runner.py退出时停止收集进程
+    atexit.register(stop_prometheus_collector)
+    
+    print(f"Prometheus数据收集进程已启动，PID: {prometheus_collector_process.pid}")
+    return prometheus_collector_process
+
+def stop_prometheus_collector():
+    """停止prometheus_collector.py进程"""
+    global prometheus_collector_process
+    
+    if prometheus_collector_process and prometheus_collector_process.poll() is None:
+        print("停止Prometheus数据收集进程...")
+        # 在Windows上使用CTRL_BREAK_EVENT信号
+        if os.name == 'nt':
+            prometheus_collector_process.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            # 在Unix/Linux上使用SIGTERM信号
+            prometheus_collector_process.send_signal(signal.SIGTERM)
+        
+        # 等待进程结束
+        try:
+            prometheus_collector_process.wait(timeout=10)
+            print("Prometheus数据收集进程已停止")
+        except subprocess.TimeoutExpired:
+            print("Prometheus数据收集进程未响应，强制终止")
+            prometheus_collector_process.kill()
+        
+        # 取消注册退出处理函数
+        atexit.unregister(stop_prometheus_collector)
 
 
 
@@ -83,6 +137,10 @@ def job_assignment(v_pool, v_futures, event, stats, local_latency_stats):
 def file_runner(workload=None):
     global start_time, stats, local_latency_stats
 
+    # 启动Prometheus数据收集进程
+    # collector_output_file = f"prometheus_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    # start_prometheus_collector(collector_output_file)
+
     stats = list()
     print("###############################################")
     print("############   Run Forrest Run!!   ############")
@@ -130,6 +188,10 @@ def file_runner(workload=None):
 
 def greedy_runner():
     global start_time, stats, local_latency_stats, runner_parameters
+
+    # 启动Prometheus数据收集进程
+    # collector_output_file = f"prometheus_data_greedy_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    # start_prometheus_collector(collector_output_file)
 
     if 'ingress_service' in runner_parameters.keys():
         srv=runner_parameters['ingress_service']
@@ -180,6 +242,10 @@ def greedy_runner():
 
 def periodic_runner():
     global start_time, stats, local_latency_stats, runner_parameters
+
+    # 启动Prometheus数据收集进程
+    # collector_output_file = f"prometheus_data_periodic_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    # start_prometheus_collector(collector_output_file)
 
     if 'rate' in runner_parameters.keys():
         rate=runner_parameters['rate']
@@ -234,9 +300,10 @@ def periodic_runner():
 ### Main
 
 RUNNER_PATH = os.path.dirname(os.path.abspath(__file__))
+EXPERIMENT_PATH = 'Experiment'
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
-                    help='The Runner Parameters file', default=f'{RUNNER_PATH}/RunnerParameters.json')
+                    help='The Runner Parameters file', default=f'{EXPERIMENT_PATH}/RunnerParameters.json')
 
 argcomplete.autocomplete(parser)
 
@@ -270,6 +337,10 @@ try:
     ms_access_gateway = runner_parameters["ms_access_gateway"] # nginx access gateway ip
     workloads = runner_parameters["workload_files_path_list"] 
     threads = runner_parameters["thread_pool_size"] # n. parallel threads
+    trace = runner_parameters["trace"] # trace file
+    trace_output_dir = runner_parameters["output_dir"] # output directory
+    trace_output_file = runner_parameters["output_file"] # output file
+    multiplier = runner_parameters["multiplier"]
     round = runner_parameters["workload_rounds"]  # number of repetition rounds
     result_file = runner_parameters["result_file"]  # number of repetition rounds
     if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
@@ -288,6 +359,9 @@ try:
 except Exception as err:
     print("ERROR: in Runner Parameters,", err)
     exit(1)
+
+# Generate workload json first using workloadGen.py
+os.system(f"python3 Experiment/workloadGen.py -t {trace} -o  {trace_output_dir} -f {trace_output_file} -m {multiplier}")
 
 
 ## Check if "workloads" is a directory path, if so take all the workload files inside it

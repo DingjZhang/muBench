@@ -13,6 +13,7 @@ def deploy_items(folder,st):
     config.load_kube_config()
     k8s_apps_api = client.AppsV1Api()
     k8s_core_api = client.CoreV1Api()
+    k8s_autoscaling_api = client.AutoscalingV2Api()
     items = list()
     for r, d, f in os.walk(folder):
         f.sort(reverse=True)    # userd to deploy first pods demanding more resources
@@ -46,6 +47,15 @@ def deploy_items(folder,st):
                             k8s_core_api.create_namespaced_config_map(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
                             print(f"ConfigMap '{partial_yaml['metadata']['name']}' created.")
                             print("---")
+                    elif partial_yaml["kind"] == "HorizontalPodAutoscaler":
+                        k8s_autoscaling_api.create_namespaced_horizontal_pod_autoscaler(
+                            namespace=partial_yaml["metadata"]["namespace"],
+                            body=partial_yaml
+                        )
+                        print(f"HorizontalPodAutoscaler '{partial_yaml['metadata']['name']}' created.")
+                        print("---")
+                    else:
+                        print(f"Kind '{partial_yaml['kind']}' not supported.")
                 except ApiException as err:
                     api_exception_body = json.loads(err.body)
                     print("######################")
@@ -59,6 +69,7 @@ def undeploy_items(folder):
     config.load_kube_config()
     k8s_apps_api = client.AppsV1Api()
     k8s_core_api = client.CoreV1Api()
+    k8s_autoscaling_api = client.AutoscalingV2Api()
     items = list()
     for r, d, f in os.walk(folder):
         for file in f:
@@ -84,6 +95,11 @@ def undeploy_items(folder):
                         map_name = partial_yaml["metadata"]["name"]
                         resp = k8s_core_api.delete_namespaced_config_map(name=map_name, namespace=partial_yaml["metadata"]["namespace"])
                         print(f"ConfigMap '{map_name}' deleted.")
+                        print("---")
+                    elif partial_yaml["kind"] == "HorizontalPodAutoscaler":
+                        hpa_name = partial_yaml["metadata"]["name"]
+                        resp = k8s_autoscaling_api.delete_namespaced_horizontal_pod_autoscaler(name=hpa_name, namespace=partial_yaml["metadata"]["namespace"])
+                        print(f"HorizontalPodAutoscaler '{hpa_name}' deleted.")
                         print("---")
                 except ApiException as err:
                     api_exception_body = json.loads(err.body)

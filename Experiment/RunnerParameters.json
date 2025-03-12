@@ -1,12 +1,18 @@
 {
    "RunnerParameters":{
-      "ms_access_gateway": "http://198.22.255.85:31113",
-      "workload_files_path_list": ["SimulationWorkspace/workload.json"],
+      "ms_access_gateway": "http://198.22.255.82:31113",
+      "workload_files_path_list": ["Experiment/workloads/scaled_diurnal_workload.json"],
       "workload_rounds": 1,
-      "workload_type": "greedy",
+      "workload_type": "file",
       "workload_events": 5000,
-      "thread_pool_size": 4,
-      "result_file": "result"
+      "thread_pool_size": 32,
+      "rate": 5,
+      "ingress_service": "s0",
+      "result_file": "result.txt",
+      "trace": "traces/scaled_diurnal.txt",
+      "output_dir": "Experiment/workloads",
+      "output_file": "scaled_diurnal_workload.json",
+      "multiplier": 2
    },
    "OutputPath": "Experiment/SimulationWorkspace/Result",
    "_AfterWorkloadFunction": {
