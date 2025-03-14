@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: local-first-scheduler
+  namespace: kube-system
+  labels:
+    app: local-first-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: local-first-scheduler
+  template:
+    metadata:
+      labels:
+        app: local-first-scheduler
+    spec:
+      serviceAccountName: local-first-scheduler
+      containers:
+      - name: scheduler
+        image: docker.io/civildocker/local-first-scheduler:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        env:
+        - name: SCHEDULER_NAME
+          value: "local-first-scheduler"
+        - name: REBALANCE_INTERVAL
+          value: "30"
+        - name: LOG_LEVEL
+          value: "INFO"
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"

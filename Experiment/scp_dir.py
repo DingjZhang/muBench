@@ -18,12 +18,12 @@ def main():
     parser.add_argument('--update', action='store_true', help='更新脚本中的域名变量')
     args = parser.parse_args()
     # 设置域名变量
-    master_domain_name = "pc63.cloudlab.umass.edu"
-    worker1_domain_name = "pc84.cloudlab.umass.edu"
-    worker2_domain_name = "pc70.cloudlab.umass.edu"
+    master_domain_name = "pc65.cloudlab.umass.edu"
+    worker1_domain_name = "pc89.cloudlab.umass.edu"
+    worker2_domain_name = "pc64.cloudlab.umass.edu"
     # worker3_domain_name = "pc85.cloudlab.umass.edu"
     # worker4_domain_name = "pc83.cloudlab.umass.edu"
-    load_gen_domain_name = "pc94.cloudlab.umass.edu"
+    load_gen_domain_name = "pc88.cloudlab.umass.edu"
     
     # 定义要发送的文件夹路径
     # source_dir = r"D:\adaptation\muBench\Experiment"
@@ -57,25 +57,49 @@ def main():
                 # 写回文件
                 with open(script_path, 'w', encoding='utf-8', newline='\n') as f:
                     f.write(content)
-        
-        print("域名变量更新和格式转换完成！")
-    
-        print("正在将shell脚本转换为Unix格式...")
-        
-        # 获取source_dir中所有.sh结尾的文件
-        shell_files = glob.glob(os.path.join(source_dir, "*.sh"))
-        
-        # 对每个shell脚本执行dos2unix转换
-        for shell_file in shell_files:
+
+        locust_conf_file = os.path.join(source_dir, "locust.conf")
+        if os.path.exists(locust_conf_file):
+            # 获取master服务器的IP地址
             try:
-                # 使用subprocess调用dos2unix命令
-                subprocess.run(["dos2unix", shell_file], check=True)
-                print(f"成功转换文件: {shell_file}")
+                master_ip = subprocess.check_output(["dig", "+short", master_domain_name]).decode().strip()
+
+                # 读取locust.conf文件内容
+                with open(locust_conf_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                # 使用正则表达式替换IP地址
+                content = re.sub(r'host = http://\d+\.\d+\.\d+\.\d+:31113', f'host = http://{master_ip}:31113', content)
+
+                # 写回文件
+                with open(locust_conf_file, 'w', encoding='utf-8', newline='\n') as f:
+                    f.write(content)
+
+                print(f"已更新locust.conf中的master IP地址为: {master_ip}")
             except subprocess.CalledProcessError as e:
-                print(f"转换文件失败 {shell_file}: {str(e)}")
-            except FileNotFoundError:
-                print("错误: 未找到dos2unix命令，请确保已安装")
-                sys.exit(1)
+                print(f"获取master IP地址失败: {str(e)}")
+            except Exception as e:
+                print(f"更新locust.conf文件失败: {str(e)}")
+
+
+                print("域名变量更新和格式转换完成！")
+
+                print("正在将shell脚本转换为Unix格式...")
+
+                # 获取source_dir中所有.sh结尾的文件
+                shell_files = glob.glob(os.path.join(source_dir, "*.sh"))
+
+                # 对每个shell脚本执行dos2unix转换
+                for shell_file in shell_files:
+                    try:
+                        # 使用subprocess调用dos2unix命令
+                        subprocess.run(["dos2unix", shell_file], check=True)
+                        print(f"成功转换文件: {shell_file}")
+                    except subprocess.CalledProcessError as e:
+                        print(f"转换文件失败 {shell_file}: {str(e)}")
+                    except FileNotFoundError:
+                        print("错误: 未找到dos2unix命令，请确保已安装")
+                        sys.exit(1)
         
         print("shell脚本格式转换完成！")
     

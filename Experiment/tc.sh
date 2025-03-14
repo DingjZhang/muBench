@@ -16,12 +16,12 @@ while getopts ":d" opt; do
 done
 shift $((OPTIND -1))
 
-MASTER_DOMAIN_NAME="pc63.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc84.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc70.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="pc65.cloudlab.umass.edu"
+WORKER1_DOMAIN_NAME="pc89.cloudlab.umass.edu"
+WORKER2_DOMAIN_NAME="pc64.cloudlab.umass.edu"
 # WORKER3_DOMAIN_NAME="pc85.cloudlab.umass.edu"
 # WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
-LOAD_GEN_DOMAIN_NAME="pc94.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="pc88.cloudlab.umass.edu"
 
 
 MASTER_IP=$(getent hosts $MASTER_DOMAIN_NAME | awk '{print $1}')

@@ -6,10 +6,29 @@ import subprocess
 import argparse
 import logging
 import time
+import json
+import pytz
+import datetime
 
 # 配置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+class LocalTimezoneFormatter(logging.Formatter):
+    def converter(self, timestamp):
+        dt = datetime.datetime.fromtimestamp(timestamp)
+        return dt.astimezone(pytz.timezone('Asia/Shanghai'))
+
+    def formatTime(self, record, datefmt=None):
+        dt = self.converter(record.created)
+        if datefmt:
+            return dt.strftime(datefmt)
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+
+formatter = LocalTimezoneFormatter('%(asctime)s - %(levelname)s - %(message)s')
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
 logger = logging.getLogger('UpdateScheduler')
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 def run_command(command, shell=False):
     """
@@ -63,6 +82,24 @@ def build_docker_image(image_name, tag, dockerfile_path=".", scheduler_dir=None)
         logger.error(f"Docker镜像构建失败: {e}")
         sys.exit(1)
 
+def check_docker_login(registry):
+    """检查是否已登录到指定Docker仓库"""
+    try:
+        docker_config = os.path.expanduser('~/.docker/config.json')
+        if not os.path.exists(docker_config):
+            return False
+            
+        with open(docker_config, 'r') as f:
+            config = json.load(f)
+            
+        # 检查认证信息
+        auths = config.get('auths', {})
+        return any(registry in url for url in auths.keys())
+        
+    except Exception as e:
+        logger.error(f"检查Docker登录状态时出错: {e}")
+        raise
+
 def push_docker_image(image_name, tag, registry):
     """
     推送Docker镜像到仓库
@@ -72,16 +109,22 @@ def push_docker_image(image_name, tag, registry):
         tag: 镜像标签
         registry: 镜像仓库地址
     """
+    # 检查Docker登录状态
+    # if not check_docker_login(registry):
+    #     logger.info(f"未检测到Docker仓库登录状态，尝试登录...")
+    #     try:
+    #         # 使用交互式方式登录，让Docker自己提示输入密码
+    #         run_command(["docker", "login", "-u", "civildocker", "--password-stdin", registry], shell=True)
+    #     except Exception as e:
+    #         logger.error(f"Docker登录失败: {e}")
+    #         sys.exit(1)
+    
     local_image = f"{image_name}:{tag}"
     registry_image = f"{registry}/{image_name}:{tag}"
     
     logger.info(f"标记镜像: {local_image} -> {registry_image}")
     try:
-        # 标记镜像
         run_command(["docker", "tag", local_image, registry_image])
-        
-        # 推送镜像
-        logger.info(f"推送镜像到仓库: {registry_image}")
         run_command(["docker", "push", registry_image])
         logger.info(f"镜像推送成功: {registry_image}")
     except Exception as e:
@@ -130,12 +173,18 @@ def delete_scheduler(deployment_file):
     """
     logger.info(f"删除现有的调度器部署: {deployment_file}")
     try:
-        # 使用 kubectl delete -f 命令删除调度器
-        run_command(["kubectl", "delete", "-f", deployment_file])
-        logger.info(f"调度器删除成功")
-        # 等待Pod完全终止
-        logger.info("等待Pod完全终止...")
-        time.sleep(5)
+        # 检查资源是否存在
+        check_result = run_command(["kubectl", "get", "-f", deployment_file, "--ignore-not-found", "-o", "name"], shell=False)
+        
+        if check_result.stdout.strip():
+            # 资源存在时执行删除
+            run_command(["kubectl", "delete", "-f", deployment_file])
+            logger.info(f"调度器删除成功")
+            # 等待Pod完全终止
+            logger.info("等待Pod完全终止...")
+            time.sleep(5)
+        else:
+            logger.info(f"资源不存在，跳过删除步骤")
     except Exception as e:
         logger.error(f"删除调度器失败: {e}")
         # 继续执行，因为可能是首次部署

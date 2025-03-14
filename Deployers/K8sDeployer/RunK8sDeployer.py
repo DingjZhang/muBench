@@ -59,7 +59,7 @@ parser.add_argument('-c', '--config-file', action='store', dest='parameters_file
 parser.add_argument('--hpa', action='store_true', dest='enable_hpa',
                     help='Enable Horizontal Pod Autoscaling', default=False)
 parser.add_argument('--hpa-template', type=str, dest='hpa_template_file',
-                    help='Path of the HPA YAML file template', default=os.path.abspath(os.path.join(k8s_Builder_PATH, '../../Add-on/HPA/hpa-template.yaml')))
+                    help='Path of the HPA YAML file template', default=os.path.abspath(os.path.join(k8s_Builder_PATH, '../../Add-on/HPA/hpa-template-container-resources.yaml')))
 
 
 argcomplete.autocomplete(parser)

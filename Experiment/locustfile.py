@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 trace_file = 'traces/scaled_diurnal.txt'
-multiplier = 4
+multiplier = 1.6
 
 # 读取配置文件
 # def load_config(config_file='config.conf'):
@@ -48,7 +48,7 @@ def load_trace_file(file_path):
         with open(file_path, 'r') as f:
             trace_data = [int(float(line.strip())) for line in f if line.strip()]
             # 每隔12个选一个数据
-            trace_data = trace_data[::5]
+            trace_data = trace_data[::2]
             trace_data = [int(x * multiplier) for x in trace_data]
             return trace_data
     except Exception as e:
@@ -111,7 +111,7 @@ def on_test_stop(environment, **kwargs):
 # 定义用户行为
 class MuBenchUser(HttpUser):
     # wait_time = between(0.001, 0.005)  # 由LoadTestShape完全控制生成率
-    wait_time = constant_throughput(100)
+    wait_time = constant_throughput(1)
     # fixed_count = 1
     
     

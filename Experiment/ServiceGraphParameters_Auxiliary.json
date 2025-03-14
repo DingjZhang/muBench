@@ -3,7 +3,7 @@
        "external_service_groups":1,
        "seq_len":20,
        "service_probability": {"model":"const", "params":{"value":1}},
-       "vertices":20,
+       "vertices":40,
        "power":0.05,
        "zero_appeal":3.25,
        "dbs":{

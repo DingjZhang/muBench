@@ -1,30 +1,29 @@
 #!/bin/bash
 
-# 添加用户权限处理
+# 定义基础路径变量
 USER_HOME="/users/Dingjie"
+PROJECT_DIR="${USER_HOME}/muBench"  # 新增项目根目录变量
 
-# chmod 777 /users/Dingjie/mubench.zip
-# # unzip mubench.zip
-# # 解压缩mubench.zip文件
-# cd /users/Dingjie
-# # 将mubench.zip解压缩到mubench目录中
-# unzip -o mubench.zip -d mubench
-chmod -R 777 /users/Dingjie/muBench
-cd /users/Dingjie
+# 修改权限命令替换
+chmod -R 777 "$PROJECT_DIR"
 
+cd "$USER_HOME"
 # 修复 pip 缓存目录权限
 apt-get update
 apt-get install -y dos2unix
 sudo -H apt install -y python3.10-venv  # 添加 -H 参数
-python -m venv venv
-source venv/bin/activate
+# 在USER_HOME目录下创建并激活虚拟环境
+cd "$USER_HOME"
+python -m venv "$USER_HOME/venv"
+source "$USER_HOME/venv/bin/activate"
 
-cd /users/Dingjie/muBench
+cd "$USER_HOME"  # 替换原绝对路径
 # 添加缓存目录配置
 export PIP_CACHE_DIR="${USER_HOME}/.cache/pip"
 mkdir -p ${PIP_CACHE_DIR}
 chmod -R 777 ${USER_HOME}/.cache
 
+cd "$PROJECT_DIR"
 apt-get install -y python3-dev cmake
 python -m pip install "cython<3.0.0" wheel
 python -m pip install --no-build-isolation PyYAML==5.4.1
@@ -38,7 +37,7 @@ if hostname | grep -q "node3"; then
 fi
 
 # 将monitoring-install.sh的换行符从CRLF转换为LF
-cd /users/Dingjie/muBench/Monitoring/kubernetes-full-monitoring
+cd "$PROJECT_DIR/Monitoring/kubernetes-full-monitoring"  # 使用组合路径变量
 dos2unix monitoring-install.sh
 
 sh monitoring-install.sh
@@ -54,4 +53,5 @@ kubectl label nodes node2 node-type=remote --overwrite
 # kubectl label nodes node4 node-type=remote --overwrite
 echo "节点标签添加完成"
 
+cd "$PROJECT_DIR"
 kubectl apply -f Experiment/components.yaml

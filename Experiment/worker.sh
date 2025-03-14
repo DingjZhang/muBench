@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 # 这个脚本用于在worker节点设置Kubernetes并加入集群
 # 请在Ubuntu 22.04系统上以root或sudo权限运行
 
@@ -18,12 +18,12 @@ echo -e "${GREEN}开始配置Kubernetes工作节点...${NC}"
 # 提示用户输入IP地址
 #read -p "请输入master节点IP地址: " MASTER_IP
 #read -p "请输入worker节点IP地址: " WORKER_IP
-MASTER_DOMAIN_NAME="pc63.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc84.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc70.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="pc65.cloudlab.umass.edu"
+WORKER1_DOMAIN_NAME="pc89.cloudlab.umass.edu"
+WORKER2_DOMAIN_NAME="pc64.cloudlab.umass.edu"
 # WORKER3_DOMAIN_NAME="pc85.cloudlab.umass.edu"
 # WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
-LOAD_GEN_DOMAIN_NAME="pc94.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="pc88.cloudlab.umass.edu"
 
 
 # 通过域名获取WORKER1_IP
@@ -137,16 +137,35 @@ apt update
 apt install -y kubelet kubeadm kubectl
 apt-mark hold kubelet kubeadm kubectl
 
-echo "${GREEN}执行tc.sh${NC}"
+echo -e "${GREEN}执行tc.sh${NC}"
 bash tc.sh
-# �?master 节点�?users/Dingjie文件夹拉取join-command.sh文件
-# echo -e "${GREEN}�?master 节点�?users/Dingjie文件夹拉取join-command.sh文件...${NC}"
+# master 节点/users/Dingjie文件夹拉取join-command.sh文件
+# echo -e "${GREEN}master 节点/users/Dingjie文件夹拉取join-command.sh文件...${NC}"
 # scp Dingjie@$MASTER_IP:/users/Dingjie/Experiment/join-command.sh .
 
 # 执行join-command.sh文件
 # echo -e "${GREEN}执行join-command.sh文件...${NC}"
 # bash join-command.sh
 # 提示用户输入join-command
+
+# edit ~/.tmux.conf file
+echo -e "${GREEN}设置~/.tmux.conf文件...${NC}"
+cat <<EOF > ~/.tmux.conf
+set -g mouse on
+set -g default-terminal "screen-256color"
+set -g history-limit 10000
+set -g status-utf8 on
+set -g status-position bottom
+set -g status-justify left
+set -g status-left-length 100
+set -g status-right-length 100
+set -g status-left "#[fg=green,bg=black] #S #[fg=green,bg=black,bold] #(whoami)@
+EOF
+# install tmux
+echo -e "${GREEN}安装tmux...${NC}"
+apt-get install -y tmux
+tmux source-file ~/.tmux.conf
+
 echo -e "${GREEN}请输入join-command:${NC}"
 
-# echo -e "${GREEN}工作节点设置完成�?{NC}"
+# echo -e "${GREEN}工作节点设置完成${NC}"

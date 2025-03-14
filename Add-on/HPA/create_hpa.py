@@ -21,6 +21,16 @@ def create_hpa(yaml_file_in, yaml_file_out, hpa_template_file):
                 with open(yaml_file_out, 'w') as file:
                     yaml.dump(hpa, file, default_flow_style=False)
                     print(f"Created HPA yaml file: {yaml_file_out}")
+                # print(hpa_template_file)
+                if 'container' in hpa_template_file:
+                    with open(yaml_file_out, 'r') as file:
+                        f = file.read()
+                        # print(f)
+                        service_name = partial_yaml['metadata']['name']
+                        f = f.replace('SERVICE_NAME', service_name)
+                    # print(f)
+                    with open(yaml_file_out, 'w') as file:
+                        file.write(f)
 
 # Example usage:
 # python3 Add-on/HPA/create-hpa.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/hpa' --template 'Add-on/HPA/hpa-template.yaml' 

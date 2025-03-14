@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+﻿#!/usr/bin/bash
 # 这个脚本用于在master节点设置Kubernetes集群
 # 请在Ubuntu 22.04系统上以root或sudo权限运行
 
@@ -35,12 +35,12 @@ hostnamectl set-hostname node0
 # read -p "请输入master节点IP地址: " MASTER_IP
 # read -p "请输入worker节点IP地址: " WORKER_IP
 
-MASTER_DOMAIN_NAME="pc63.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc84.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc70.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="pc65.cloudlab.umass.edu"
+WORKER1_DOMAIN_NAME="pc89.cloudlab.umass.edu"
+WORKER2_DOMAIN_NAME="pc64.cloudlab.umass.edu"
 # WORKER3_DOMAIN_NAME="pc85.cloudlab.umass.edu"
 # WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
-LOAD_GEN_DOMAIN_NAME="pc94.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="pc88.cloudlab.umass.edu"
 
 
 
@@ -152,7 +152,7 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket=unix:///var/run/cri-d
 # 设置kubectl配置文件
 echo -e "${GREEN}设置kubectl配置...${NC}"
 mkdir -p $HOME/.kube
-cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
 
 # 安装Calico网络插件
@@ -191,7 +191,7 @@ echo -e "${GREEN}Master节点设置完成${NC}"
 # 设置在普通用户模式下也可以使用kubectl
 echo -e "${GREEN}设置在普通用户模式下也可以使用kubectl...${NC}"
 mkdir -p /users/Dingjie/.kube
-cp -i /etc/kubernetes/admin.conf /users/Dingjie/.kube/config
+cp -f /etc/kubernetes/admin.conf /users/Dingjie/.kube/config
 chown $(id -u):$(id -g) /users/Dingjie/.kube/config
 chmod -R 777 /users/Dingjie/.kube
 
@@ -232,6 +232,25 @@ set completion-ignore-case on
 EOF
 # execute bind ~/.inputrc
 bind -f ~/.inputrc
+
+# edit ~/.tmux.conf file
+echo -e "${GREEN}设置~/.tmux.conf文件...${NC}"
+cat <<EOF > ~/.tmux.conf
+set -g mouse on
+set -g default-terminal "screen-256color"
+set -g history-limit 10000
+set -g status-utf8 on
+set -g status-position bottom
+set -g status-justify left
+set -g status-left-length 100
+set -g status-right-length 100
+set -g status-left "#[fg=green,bg=black] #S #[fg=green,bg=black,bold] #(whoami)@
+EOF
+# install tmux
+echo -e "${GREEN}安装tmux...${NC}"
+apt-get install -y tmux
+tmux source-file ~/.tmux.conf
+
 
 # add /users/Dingjie/.local/bin to PATH
 echo -e "${GREEN}添加/users/Dingjie/.local/bin到PATH...${NC}"

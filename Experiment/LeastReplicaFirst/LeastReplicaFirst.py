@@ -11,7 +11,7 @@ from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 
 # 配置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
 logger = logging.getLogger('LeastReplicaFirstScheduler')
 
 SCHEDULER_NAME = os.environ.get('SCHEDULER_NAME', 'least-replica-first-scheduler')
@@ -37,6 +37,8 @@ class LeastReplicaFirstScheduler:
         
         # 初始化调度器状态
         self.scheduler_running = True
+        # 添加平衡计时器
+        self.last_balance_time = time.time()
     
     def get_pod_owner_info(self, pod) -> Tuple[str, str, int]:
         """获取Pod所属的控制器信息
@@ -614,16 +616,19 @@ class LeastReplicaFirstScheduler:
                             import traceback
                             logger.error(f"错误详情: {traceback.format_exc()}")
                 
-                # 定期尝试平衡Pod分布
-                try:
-                    self.balance_pods()
-                except Exception as e:
-                    logger.error(f"平衡Pod分布时发生错误: {e}")
-                    import traceback
-                    logger.error(f"错误详情: {traceback.format_exc()}")
+                # 定期尝试平衡Pod分布（每15秒执行一次）
+                current_time = time.time()
+                if current_time - self.last_balance_time > 15:
+                    try:
+                        self.balance_pods()
+                        self.last_balance_time = current_time  # 更新最后执行时间
+                    except Exception as e:
+                        logger.error(f"平衡Pod分布时发生错误: {e}")
+                        import traceback
+                        logger.error(f"错误详情: {traceback.format_exc()}")
                 
                 # 短暂休眠，避免CPU使用率过高
-                time.sleep(15)
+                time.sleep(1)
                 
             except Exception as e:
                 logger.error(f"调度器运行时发生错误: {e}")

@@ -15,7 +15,7 @@ prometheus_url = "http://localhost:30000"
 STOP_COLLECTION = False
 COLLECTION_INTERVAL = 15  # 数据收集间隔，单位为秒
 result_dict = {'latency': [], 'node1': [], 'node2': [], 'node1_pod_num': [], 'node2_pod_num': [], 'timestamp': []}
-output_dir = 'Experiment/collected_data'
+output_dir = 'collected_data'
 output_file = f'prometheus_data_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'  # 默认输出文件名
 
 def query_latency():
