@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# 解析命令行参数
+ONLY_INSTALL=false
+for arg in "$@"; do
+  if [ "$arg" == "--only-install" ]; then
+    ONLY_INSTALL=true
+  fi
+done
+
 # 定义基础路径变量
 USER_HOME="/users/Dingjie"
 PROJECT_DIR="${USER_HOME}/muBench"  # 新增项目根目录变量
@@ -30,9 +38,9 @@ python -m pip install --no-build-isolation PyYAML==5.4.1
 sudo apt-get -y install libffi-dev libcairo2
 python -m pip install --cache-dir=${PIP_CACHE_DIR} -r requirements.txt
 
-# 检查节点名是否包含node5
-if hostname | grep -q "node3"; then
-  echo "检测到节点名包含node3，跳过节点标签添加并结束脚本执行"
+# 检查是否指定了只安装选项
+if [ "$ONLY_INSTALL" = true ]; then
+  echo "检测到--only-install选项，完成安装后跳过节点标签添加并结束脚本执行"
   exit 0
 fi
 

@@ -46,7 +46,7 @@ class LocalFirstScheduler:
         # 添加重平衡计时器
         self.last_rebalance_time = time.time()
         # self.evict_pod_flag = True # 表示在bind_pod中是否执行了evict_pod
-        self.binded_pod_name = [] # 记录已经绑定的pod_name
+        # self.binded_pod_name = [] # 记录已经绑定的pod_name
     
     def get_nodes_by_label(self, label_selector: str) -> List[client.V1Node]:
         """获取带有特定标签的节点列表
@@ -74,7 +74,9 @@ class LocalFirstScheduler:
             List[client.V1Pod]: Pod列表
         """
         try:
-            field_selector = f'spec.nodeName={node_name},status.phase=Running'
+            # field_selector = f'spec.nodeName={node_name},status.phase=Running'
+            # 不止统计处于Running状态的Pod
+            field_selector = f'spec.nodeName={node_name}'
             # 只获取default命名空间的Pod
             pods = self.core_v1.list_namespaced_pod(namespace="default", field_selector=field_selector).items
             return pods
@@ -223,7 +225,7 @@ class LocalFirstScheduler:
             
             # 检查是否有足够的资源
             
-            has_enough_cpu = node_cpu - used_cpu >= pod_cpu
+            has_enough_cpu = node_cpu - used_cpu - 1000 >= pod_cpu
             has_enough_memory = node_memory - used_memory >= pod_memory
             
             if not has_enough_cpu:
@@ -240,7 +242,7 @@ class LocalFirstScheduler:
             logger.error(f"错误详情: {traceback.format_exc()}")
             return False
     
-    def bind_pod(self, pod_name: str, pod_namespace: str, node_name: str):
+    def bind_pod_by_name(self, pod_name: str, pod_namespace: str, node_name: str):
         """将Pod绑定到指定节点
         
         Args:
@@ -254,6 +256,8 @@ class LocalFirstScheduler:
         try:
             logger.info(f"正在将Pod {pod_namespace}/{pod_name} 绑定到节点 {node_name}")
             
+
+
             # 创建绑定对象
             binding = client.V1Binding(
                 metadata=client.V1ObjectMeta(name=pod_name),
@@ -265,6 +269,8 @@ class LocalFirstScheduler:
             )
             logger.info(f"创建绑定对象成功，正在执行绑定操作 Pod {pod_namespace}/{pod_name}")
             
+            # check if pod can fit in node
+
             # 执行绑定操作
             self.core_v1.create_namespaced_binding(
                 namespace=pod_namespace,
@@ -273,59 +279,81 @@ class LocalFirstScheduler:
             )
             logger.info(f"绑定操作执行成功 Pod {pod_namespace}/{pod_name}")
 
+            pod_on_node_lst = self.get_pods_on_node(node_name)
+            pods_name_lst = [p.metadata.name for p in pod_on_node_lst]
+            if pod_name in pods_name_lst:
+                logger.info(f"Pod {pod_namespace}/{pod_name} 已成功绑定到节点 {node_name}")
+            else:
+                logger.error(f"刚绑定后节点 {node_name} 上没有Pod {pod_namespace}/{pod_name} ")    
+            
+            # 获取Pod的Events信息
+            try:
+                events = self.core_v1.list_namespaced_event(
+                    namespace=pod_namespace,
+                    field_selector=f'involvedObject.name={pod_name}'
+                ).items
+                if events:
+                    logger.info(f"Pod相关事件 {pod_name}:")
+                    for event in events:
+                        logger.info(f"{pod_name}  - {event.last_timestamp}: {event.reason} - {event.message}")
+                else:
+                    logger.error("未找到Pod相关事件")
+            except ApiException as e:
+                logger.error(f"获取Pod事件信息失败: {e}")
+
             # 等待Pod进入Running状态
-            max_retries = 30  # 最大重试次数
-            retry_interval = 2  # 重试间隔（秒）
+            # max_retries = 30  # 最大重试次数
+            # retry_interval = 2  # 重试间隔（秒）
             
-            for _ in range(max_retries):
-                try:
-                    pod_status = self.core_v1.read_namespaced_pod_status(
-                        name=pod_name,
-                        namespace=pod_namespace
-                    )
-                    if pod_status.status.phase == 'Running':
-                        logger.info(f"Pod {pod_namespace}/{pod_name} 已成功进入Running状态 {node_name}")
-                        return True
-                    elif pod_status.status.phase in ['Failed', 'Unknown']:
-                        # 获取Pod的Events信息
-                        try:
-                            events = self.core_v1.list_namespaced_event(
-                                namespace=pod_namespace,
-                                field_selector=f'involvedObject.name={pod_name}'
-                            ).items
-                            if events:
-                                logger.error(f"Pod相关事件 {pod_name}:")
-                                for event in events:
-                                    logger.error(f"{pod_name}  - {event.last_timestamp}: {event.reason} - {event.message}")
-                            else:
-                                logger.error("未找到Pod相关事件")
-                        except ApiException as e:
-                            logger.error(f"获取Pod事件信息失败: {e}")
-                        # 尝试解除Pod的节点绑定
-                        self.evict_pod_by_name(pod_name, pod_namespace)
-                        logger.error(f"Pod {pod_namespace}/{pod_name} 进入异常状态: {pod_status.status.phase}")
-                        # self.evict_pod_flag = True
-                        return False
+            # for _ in range(max_retries):
+            #     try:
+            #         pod_status = self.core_v1.read_namespaced_pod_status(
+            #             name=pod_name,
+            #             namespace=pod_namespace
+            #         )
+            #         if pod_status.status.phase == 'Running':
+            #             logger.info(f"Pod {pod_namespace}/{pod_name} 已成功进入Running状态 {node_name}")
+            #             return True
+            #         elif pod_status.status.phase in ['Failed', 'Unknown']:
+            #             # 获取Pod的Events信息
+            #             try:
+            #                 events = self.core_v1.list_namespaced_event(
+            #                     namespace=pod_namespace,
+            #                     field_selector=f'involvedObject.name={pod_name}'
+            #                 ).items
+            #                 if events:
+            #                     logger.error(f"Pod相关事件 {pod_name}:")
+            #                     for event in events:
+            #                         logger.error(f"{pod_name}  - {event.last_timestamp}: {event.reason} - {event.message}")
+            #                 else:
+            #                     logger.error("未找到Pod相关事件")
+            #             except ApiException as e:
+            #                 logger.error(f"获取Pod事件信息失败: {e}")
+            #             # 尝试解除Pod的节点绑定
+            #             self.evict_pod_by_name(pod_name, pod_namespace)
+            #             logger.error(f"Pod {pod_namespace}/{pod_name} 进入异常状态: {pod_status.status.phase}")
+            #             # self.evict_pod_flag = True
+            #             return False
                     
-                    logger.info(f"等待Pod {pod_namespace}/{pod_name} 进入Running状态，当前状态: {pod_status.status.phase}")
-                    time.sleep(retry_interval)
-                except ApiException as e:
-                    logger.error(f"Pod: {pod_namespace}/{pod_name} 获取Pod状态失败: {e}")
-                    # self.evict_pod_by_name(pod_name, pod_namespace)
-                    # return False
-                except Exception as e:
-                    logger.error(f"Pod: {pod_namespace}/{pod_name} 获取Pod状态时发生未预期的错误: {e}")
-                    # self.evict_pod_by_name(pod_name, pod_namespace)
-                    # return False
+            #         logger.info(f"等待Pod {pod_namespace}/{pod_name} 进入Running状态，当前状态: {pod_status.status.phase}")
+            #         time.sleep(retry_interval)
+            #     except ApiException as e:
+            #         logger.error(f"Pod: {pod_namespace}/{pod_name} 获取Pod状态失败: {e}")
+            #         # self.evict_pod_by_name(pod_name, pod_namespace)
+            #         # return False
+            #     except Exception as e:
+            #         logger.error(f"Pod: {pod_namespace}/{pod_name} 获取Pod状态时发生未预期的错误: {e}")
+            #         # self.evict_pod_by_name(pod_name, pod_namespace)
+            #         # return False
                     
             
-            logger.error(f"等待Pod {pod_namespace}/{pod_name} 进入Running状态超时")
-            self.evict_pod_by_name(pod_name, pod_namespace)
-            # self.evict_pod_flag = True
-            return False
-            
-            # logger.info(f"成功将Pod {pod_namespace}/{pod_name} 绑定到节点 {node_name}")
-            # return True
+            # logger.error(f"等待Pod {pod_namespace}/{pod_name} 进入Running状态超时")
+            # self.evict_pod_by_name(pod_name, pod_namespace)
+            # # self.evict_pod_flag = True
+            # return False
+            # time.sleep(2)
+            logger.info(f"成功将Pod {pod_namespace}/{pod_name} 绑定到节点 {node_name}")
+            return True
         except ApiException as e:
             logger.error(f"绑定Pod {pod_namespace}/{pod_name} 到节点 {node_name} 失败: {e}")
             if self.evict_pod_by_name(pod_name, pod_namespace):
@@ -341,6 +369,28 @@ class LocalFirstScheduler:
             else:
                 logger.error(f"解除Pod {pod_namespace}/{pod_name} 的节点绑定失败")
             return False
+
+    def bind_pod(self, pod, node) -> bool:
+        """
+        将Pod绑定到指定节点
+
+        Args:
+            pod: Pod对象
+            node: 节点名称
+
+        Returns:
+            bool: 绑定是否成功
+        """
+        # 验证参数
+        if not self.can_node_fit_pod(node, pod):
+            logger.error(f"绑定前检查：节点 {node} 无法容纳 Pod {pod.metadata.namespace}/{pod.metadata.name}")
+            return False
+        else:
+            logger.info(f"绑定前检查：节点 {node.metadata.name} 可以容纳 Pod {pod.metadata.namespace}/{pod.metadata.name}")
+            pod_name = pod.metadata.name
+            pod_namespace = pod.metadata.namespace
+            node_name = node.metadata.name
+            return self.bind_pod_by_name(pod_name, pod_namespace, node_name)
 
     def evict_pod_by_name(self, pod_name: str, pod_namespace: str="default") -> bool:
         """
@@ -427,7 +477,7 @@ class LocalFirstScheduler:
         local_nodes = self.get_nodes_by_label('node-type=local')
         remote_nodes = self.get_nodes_by_label('node-type=remote')
         
-        logger.info(f"找到 {len(local_nodes)} 个local节点和 {len(remote_nodes)} 个remote节点")
+        logger.info(f"找到 {len(local_nodes)} 个local节点和 {len(remote_nodes)} 个remote节点 Pod {pod_namespace}/{pod_name}")
         
         # 检查是否有可用节点
         if not local_nodes and not remote_nodes:
@@ -440,16 +490,16 @@ class LocalFirstScheduler:
             if node and node.metadata and node.metadata.name and node.status and node.status.allocatable:
                 valid_local_nodes.append(node)
             else:
-                logger.warning(f"跳过无效的local节点对象: {node.metadata.name if node and node.metadata else 'unknown'}")
+                logger.warning(f"跳过无效的local节点对象: {node.metadata.name if node and node.metadata else 'unknown'} Pod {pod_namespace}/{pod_name}")
         
         valid_remote_nodes = []
         for node in remote_nodes:
             if node and node.metadata and node.metadata.name and node.status and node.status.allocatable:
                 valid_remote_nodes.append(node)
             else:
-                logger.warning(f"跳过无效的remote节点对象: {node.metadata.name if node and node.metadata else 'unknown'}")
+                logger.warning(f"跳过无效的remote节点对象: {node.metadata.name if node and node.metadata else 'unknown'} Pod {pod_namespace}/{pod_name}")
         
-        logger.info(f"有效节点数量: {len(valid_local_nodes)} 个local节点和 {len(valid_remote_nodes)} 个remote节点")
+        logger.info(f"有效节点数量: {len(valid_local_nodes)} 个local节点和 {len(valid_remote_nodes)} 个remote节点 Pod {pod_namespace}/{pod_name}")
         
         # 首先尝试调度到local节点
         fit_node = None
@@ -461,7 +511,8 @@ class LocalFirstScheduler:
             except Exception as e:
                 logger.error(f"检查节点 {node.metadata.name} {pod_namespace}/{pod_name} 是否适合Pod时出错: {e}")
                 
-        bind_result = self.bind_pod(pod_name, pod_namespace, fit_node.metadata.name) if fit_node else False
+        # bind_result = self.bind_pod(pod_name, pod_namespace, fit_node.metadata.name) if fit_node else False
+        bind_result = self.bind_pod(pod, fit_node) if fit_node else False
         if bind_result:
             return True
         
@@ -474,7 +525,8 @@ class LocalFirstScheduler:
                         break
                 except Exception as e:
                     logger.error(f"检查节点 {node.metadata.name} {pod_namespace}/{pod_name} 是否适合Pod时出错: {e}")
-            bind_result = self.bind_pod(pod_name, pod_namespace, fit_node.metadata.name) if fit_node else False
+            # bind_result = self.bind_pod(pod_name, pod_namespace, fit_node.metadata.name) if fit_node else False
+            bind_result = self.bind_pod(pod, fit_node) if fit_node else False
         return bind_result
 
         # for node in valid_local_nodes:
@@ -614,7 +666,8 @@ class LocalFirstScheduler:
                     # 只处理pending状态且指定了我们的调度器的Pod
                     if (pod.status.phase == 'Pending' and 
                         not pod.spec.node_name and 
-                        pod.spec.scheduler_name == SCHEDULER_NAME):
+                        pod.spec.scheduler_name == SCHEDULER_NAME and
+                        'kubernetes.io/config.source' not in pod.metadata.annotations):
                         
                         logger.info(f"发现待调度的Pod: {pod.metadata.namespace}/{pod.metadata.name}")
                         try:
@@ -649,12 +702,14 @@ class LocalFirstScheduler:
                         import traceback
                         logger.error(f"错误详情: {traceback.format_exc()}")
                 
+                # log pod events
+
+
                 # 短暂休眠，避免CPU使用率过高
                 time.sleep(1)
                 
             except Exception as e:
-                logger.error(f"调度器运行时发生错误: {e}")
-                import traceback
+                logger.error(f"调度器运行时发生错误，等待5s: {e}")
                 logger.error(f"错误详情: {traceback.format_exc()}")
                 time.sleep(5)  # 出错后等待一段时间再继续
 

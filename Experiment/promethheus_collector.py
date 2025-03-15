@@ -4,6 +4,7 @@ import time
 import os
 import sys
 import signal
+import pytz
 from datetime import datetime, timedelta
 from kubernetes import client, config
 
@@ -16,7 +17,7 @@ STOP_COLLECTION = False
 COLLECTION_INTERVAL = 15  # 数据收集间隔，单位为秒
 result_dict = {'latency': [], 'node1': [], 'node2': [], 'node1_pod_num': [], 'node2_pod_num': [], 'timestamp': []}
 output_dir = 'collected_data'
-output_file = f'prometheus_data_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'  # 默认输出文件名
+output_file = f'prometheus_data_{datetime.now(tz=pytz.timezone("Asia/Shanghai")).strftime("%Y%m%d_%H%M")}.csv'  # 默认输出文件名（北京时间）
 
 def query_latency():
     # 执行一次query_command查询
@@ -91,6 +92,7 @@ def collect_data_loop():
     index = 0
     
     counter = 0  # 连续无效结果计数器
+    none_counter = 0
     while not STOP_COLLECTION:
         timestamp = datetime.now()
         timestamp = timestamp.strftime("%Y%m%d_%H%M%S")
@@ -99,8 +101,9 @@ def collect_data_loop():
         # 收集延迟数据
         latency = query_latency()
         
-        # 检查latency类型并更新计数器
+        # 检查latency类da更数.now
         if latency is not None:
+            none_counter = 0
             if pd.isna(latency):
                 counter += 1
                 print(f"警告: 第{index}次获取到非浮点数延迟值，连续无效次数: {counter}")
@@ -113,7 +116,14 @@ def collect_data_loop():
                 print(f"第{index}次查询的延迟为: {latency:.2f}")
                 result_dict['latency'].append(round(latency, 2))
         else:
-            result_dict['latency'].append(None)
+            # result_dict['latency'].append(None)
+            none_counter += 1
+            print(f"第{index}次查询的延迟为None，连续None计数器: {none_counter}")
+            if none_counter >= 4:
+                print("连续4次获取None延迟，停止数据收集")
+                STOP_COLLECTION = True
+                break
+
         
         # 收集node1上的Pod信息
         node1_pods = query_pod_list('node1')
@@ -264,7 +274,7 @@ def query_prometheus(query, start_time=None, end_time=None, step='1m'):
             safe_query = safe_query[:50]
         filename = f"{save_dir}/{safe_query}_{timestamp}.csv"
         
-        # 将数据转换为DataFrame并保存
+        # 将数据转换为Datadaa并.now
         all_dfs = []
         for result in result_data:
             # 提取标签信息
@@ -371,7 +381,7 @@ def collect_prometheus_metrics(metric_name, start_time=None, end_time=None, step
         # 将数据转换为DataFrame并保存
         all_dfs = []
         for result in result_data:
-            # 提取标签信息
+            # 提取标签信息da.now
             metric_labels = result['metric']
             
             # 提取时间序列数据

@@ -18,12 +18,12 @@ def main():
     parser.add_argument('--update', action='store_true', help='更新脚本中的域名变量')
     args = parser.parse_args()
     # 设置域名变量
-    master_domain_name = "pc65.cloudlab.umass.edu"
-    worker1_domain_name = "pc89.cloudlab.umass.edu"
-    worker2_domain_name = "pc64.cloudlab.umass.edu"
+    master_domain_name = "clnode166.clemson.cloudlab.us"
+    worker1_domain_name = "clnode163.clemson.cloudlab.us"
+    worker2_domain_name = "c220g1-031112.wisc.cloudlab.us"
     # worker3_domain_name = "pc85.cloudlab.umass.edu"
     # worker4_domain_name = "pc83.cloudlab.umass.edu"
-    load_gen_domain_name = "pc88.cloudlab.umass.edu"
+    load_gen_domain_name = "clnode159.clemson.cloudlab.us"
     
     # 定义要发送的文件夹路径
     # source_dir = r"D:\adaptation\muBench\Experiment"

@@ -35,12 +35,12 @@ hostnamectl set-hostname node0
 # read -p "请输入master节点IP地址: " MASTER_IP
 # read -p "请输入worker节点IP地址: " WORKER_IP
 
-MASTER_DOMAIN_NAME="pc65.cloudlab.umass.edu"
-WORKER1_DOMAIN_NAME="pc89.cloudlab.umass.edu"
-WORKER2_DOMAIN_NAME="pc64.cloudlab.umass.edu"
+MASTER_DOMAIN_NAME="clnode166.clemson.cloudlab.us"
+WORKER1_DOMAIN_NAME="clnode163.clemson.cloudlab.us"
+WORKER2_DOMAIN_NAME="c220g1-031112.wisc.cloudlab.us"
 # WORKER3_DOMAIN_NAME="pc85.cloudlab.umass.edu"
 # WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
-LOAD_GEN_DOMAIN_NAME="pc88.cloudlab.umass.edu"
+LOAD_GEN_DOMAIN_NAME="clnode159.clemson.cloudlab.us"
 
 
 
@@ -249,7 +249,7 @@ EOF
 # install tmux
 echo -e "${GREEN}安装tmux...${NC}"
 apt-get install -y tmux
-tmux source-file ~/.tmux.conf
+# tmux source-file ~/.tmux.conf
 
 
 # add /users/Dingjie/.local/bin to PATH
@@ -259,13 +259,18 @@ export PATH=\$PATH:/users/Dingjie/.local/bin
 EOF
 . ~/.bashrc
 
+echo -e "${GREEN}设置inotify参数...${NC}"
+sysctl -w fs.inotify.max_user_watches=2099999999
+sysctl -w fs.inotify.max_user_instances=2099999999
+sysctl -w fs.inotify.max_queued_events=2099999999
+
 # 验证节点状态
-echo -e "${GREEN}集群当前状${NC}"
+echo -e "${GREEN}集群当前状态${NC}"
 kubectl get nodes
 
-echo -e "${GREEN}执行tc.sh${NC}"
-bash tc.sh
-echo -e "${GREEN}Master节点设置完成${NC}"
+# echo -e "${GREEN}执行tc.sh${NC}"
+# bash tc.sh
+# echo -e "${GREEN}Master节点设置完成${NC}"
 
 
 
