@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 trace_file = 'traces/scaled_diurnal.txt'
-multiplier = 1.6
+multiplier = 1
 
 # 读取配置文件
 # def load_config(config_file='config.conf'):

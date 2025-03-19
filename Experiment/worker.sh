@@ -18,12 +18,12 @@ echo -e "${GREEN}开始配置Kubernetes工作节点...${NC}"
 # 提示用户输入IP地址
 #read -p "请输入master节点IP地址: " MASTER_IP
 #read -p "请输入worker节点IP地址: " WORKER_IP
-MASTER_DOMAIN_NAME="clnode166.clemson.cloudlab.us"
-WORKER1_DOMAIN_NAME="clnode163.clemson.cloudlab.us"
-WORKER2_DOMAIN_NAME="c220g1-031112.wisc.cloudlab.us"
+MASTER_DOMAIN_NAME="c220g5-111030.wisc.cloudlab.us"
+WORKER1_DOMAIN_NAME="c220g5-111032.wisc.cloudlab.us"
+WORKER2_DOMAIN_NAME="clnode251.clemson.cloudlab.us"
 # WORKER3_DOMAIN_NAME="pc85.cloudlab.umass.edu"
 # WORKER4_DOMAIN_NAME="pc83.cloudlab.umass.edu"
-LOAD_GEN_DOMAIN_NAME="clnode159.clemson.cloudlab.us"
+LOAD_GEN_DOMAIN_NAME="c220g5-111012.wisc.cloudlab.us"
 
 
 # 通过域名获取WORKER1_IP
@@ -154,12 +154,10 @@ cat <<EOF > ~/.tmux.conf
 set -g mouse on
 set -g default-terminal "screen-256color"
 set -g history-limit 10000
-set -g status-utf8 on
 set -g status-position bottom
 set -g status-justify left
 set -g status-left-length 100
 set -g status-right-length 100
-set -g status-left "#[fg=green,bg=black] #S #[fg=green,bg=black,bold] #(whoami)@
 EOF
 # install tmux
 echo -e "${GREEN}安装tmux...${NC}"

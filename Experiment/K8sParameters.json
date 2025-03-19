@@ -6,7 +6,7 @@
       "cluster_domain": "cluster",
       "path": "/api/v1",
       "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
-      "scheduler-name": "default-scheduler",
+      "scheduler-name": "local-first-scheduler",
       "sleep": 0,
       "nginx-gw": true,
       "nginx-svc-type": "NodePort",

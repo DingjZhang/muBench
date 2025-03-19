@@ -18,12 +18,12 @@ def main():
     parser.add_argument('--update', action='store_true', help='更新脚本中的域名变量')
     args = parser.parse_args()
     # 设置域名变量
-    master_domain_name = "clnode166.clemson.cloudlab.us"
-    worker1_domain_name = "clnode163.clemson.cloudlab.us"
-    worker2_domain_name = "c220g1-031112.wisc.cloudlab.us"
+    master_domain_name = "c220g5-111030.wisc.cloudlab.us"
+    worker1_domain_name = "c220g5-111032.wisc.cloudlab.us"
+    worker2_domain_name = "clnode251.clemson.cloudlab.us"
     # worker3_domain_name = "pc85.cloudlab.umass.edu"
     # worker4_domain_name = "pc83.cloudlab.umass.edu"
-    load_gen_domain_name = "clnode159.clemson.cloudlab.us"
+    load_gen_domain_name = "c220g5-111012.wisc.cloudlab.us"
     
     # 定义要发送的文件夹路径
     # source_dir = r"D:\adaptation\muBench\Experiment"
@@ -86,20 +86,20 @@ def main():
 
                 print("正在将shell脚本转换为Unix格式...")
 
-                # 获取source_dir中所有.sh结尾的文件
-                shell_files = glob.glob(os.path.join(source_dir, "*.sh"))
+        # 获取source_dir中所有.sh结尾的文件
+        shell_files = glob.glob(os.path.join(source_dir, "*.sh"))
 
-                # 对每个shell脚本执行dos2unix转换
-                for shell_file in shell_files:
-                    try:
-                        # 使用subprocess调用dos2unix命令
-                        subprocess.run(["dos2unix", shell_file], check=True)
-                        print(f"成功转换文件: {shell_file}")
-                    except subprocess.CalledProcessError as e:
-                        print(f"转换文件失败 {shell_file}: {str(e)}")
-                    except FileNotFoundError:
-                        print("错误: 未找到dos2unix命令，请确保已安装")
-                        sys.exit(1)
+        # 对每个shell脚本执行dos2unix转换
+        for shell_file in shell_files:
+            try:
+                # 使用subprocess调用dos2unix命令
+                subprocess.run(["dos2unix", shell_file], check=True)
+                print(f"成功转换文件: {shell_file}")
+            except subprocess.CalledProcessError as e:
+                print(f"转换文件失败 {shell_file}: {str(e)}")
+            except FileNotFoundError:
+                print("错误: 未找到dos2unix命令，请确保已安装")
+                sys.exit(1)
         
         print("shell脚本格式转换完成！")
     

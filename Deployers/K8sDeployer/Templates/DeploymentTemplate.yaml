@@ -31,6 +31,7 @@ spec:
       containers:
         - name: {{SERVICE_NAME}}
           image: {{IMAGE}}
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http-mubpodport
               containerPort: 8080

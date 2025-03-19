@@ -47,6 +47,11 @@ class LocalFirstScheduler:
         self.last_rebalance_time = time.time()
         # self.evict_pod_flag = True # 表示在bind_pod中是否执行了evict_pod
         # self.binded_pod_name = [] # 记录已经绑定的pod_name
+
+        # 以下三个变量用于缓存节点资源信息，避免重复查询
+        self.node_resources_cache = {}
+        self.node_cache_time = {}
+        self.NODE_CACHE_TTL = 30
     
     def get_nodes_by_label(self, label_selector: str) -> List[client.V1Node]:
         """获取带有特定标签的节点列表
@@ -84,6 +89,10 @@ class LocalFirstScheduler:
             logger.error(f"获取节点上的Pod列表失败: {e}")
             return []
     
+
+    def can_node_fit_pod_fast(self, node: client.V1Node, pod: client.V1Pod) -> bool:
+        pass
+
     def can_node_fit_pod(self, node: client.V1Node, pod: client.V1Pod) -> bool:
         """检查节点是否能够容纳Pod（检查CPU和内存资源）
         
@@ -256,8 +265,6 @@ class LocalFirstScheduler:
         try:
             logger.info(f"正在将Pod {pod_namespace}/{pod_name} 绑定到节点 {node_name}")
             
-
-
             # 创建绑定对象
             binding = client.V1Binding(
                 metadata=client.V1ObjectMeta(name=pod_name),
@@ -279,12 +286,12 @@ class LocalFirstScheduler:
             )
             logger.info(f"绑定操作执行成功 Pod {pod_namespace}/{pod_name}")
 
-            pod_on_node_lst = self.get_pods_on_node(node_name)
-            pods_name_lst = [p.metadata.name for p in pod_on_node_lst]
-            if pod_name in pods_name_lst:
-                logger.info(f"Pod {pod_namespace}/{pod_name} 已成功绑定到节点 {node_name}")
-            else:
-                logger.error(f"刚绑定后节点 {node_name} 上没有Pod {pod_namespace}/{pod_name} ")    
+            # pod_on_node_lst = self.get_pods_on_node(node_name)
+            # pods_name_lst = [p.metadata.name for p in pod_on_node_lst]
+            # if pod_name in pods_name_lst:
+            #     logger.info(f"Pod {pod_namespace}/{pod_name} 已成功绑定到节点 {node_name}")
+            # else:
+            #     logger.error(f"刚绑定后节点 {node_name} 上没有Pod {pod_namespace}/{pod_name} ")    
             
             # 获取Pod的Events信息
             try:
@@ -297,7 +304,7 @@ class LocalFirstScheduler:
                     for event in events:
                         logger.info(f"{pod_name}  - {event.last_timestamp}: {event.reason} - {event.message}")
                 else:
-                    logger.error("未找到Pod相关事件")
+                    logger.info("未找到Pod相关事件")
             except ApiException as e:
                 logger.error(f"获取Pod事件信息失败: {e}")
 
@@ -382,15 +389,15 @@ class LocalFirstScheduler:
             bool: 绑定是否成功
         """
         # 验证参数
-        if not self.can_node_fit_pod(node, pod):
-            logger.error(f"绑定前检查：节点 {node} 无法容纳 Pod {pod.metadata.namespace}/{pod.metadata.name}")
-            return False
-        else:
-            logger.info(f"绑定前检查：节点 {node.metadata.name} 可以容纳 Pod {pod.metadata.namespace}/{pod.metadata.name}")
-            pod_name = pod.metadata.name
-            pod_namespace = pod.metadata.namespace
-            node_name = node.metadata.name
-            return self.bind_pod_by_name(pod_name, pod_namespace, node_name)
+        # if not self.can_node_fit_pod(node, pod):
+        #     logger.error(f"绑定前检查：节点 {node} 无法容纳 Pod {pod.metadata.namespace}/{pod.metadata.name}")
+        #     return False
+        # else:
+        #     logger.info(f"绑定前检查：节点 {node.metadata.name} 可以容纳 Pod {pod.metadata.namespace}/{pod.metadata.name}")
+        pod_name = pod.metadata.name
+        pod_namespace = pod.metadata.namespace
+        node_name = node.metadata.name
+        return self.bind_pod_by_name(pod_name, pod_namespace, node_name)
 
     def evict_pod_by_name(self, pod_name: str, pod_namespace: str="default") -> bool:
         """
